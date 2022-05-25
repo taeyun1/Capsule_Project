@@ -28,7 +28,10 @@ class _HomePageState extends State<HomePage> {
       child: SafeArea(
         // top: false, // 상단 컬러 적용 X
         child: Scaffold(
-          appBar: AppBar(),
+          appBar: AppBar(
+            title: Text('Data'),
+            elevation: 0,
+          ),
           body: _pages[_currentIndex],
 
           // ======== 플러팅 버튼 설정 ========
