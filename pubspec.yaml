@@ -34,6 +34,11 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
 
+  # 이미지 불러오기 패키지
+  # IOS는 info.plist파일에 가서 native Settings을 해줘야함(권한이 필요한 이유 설명)
+  image_picker: ^0.8.5+3
+  provider: ^6.0.3
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

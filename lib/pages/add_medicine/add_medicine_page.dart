@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:capsule/components/capsule_constants.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 
 class AddMedicinePage extends StatefulWidget {
   const AddMedicinePage({Key? key}) : super(key: key);
@@ -11,6 +14,7 @@ class AddMedicinePage extends StatefulWidget {
 
 class _AddMedicinePageState extends State<AddMedicinePage> {
   final _nameController = TextEditingController();
+  File? _pickedImage;
 
   @override
   void dispose() {
@@ -40,13 +44,32 @@ class _AddMedicinePageState extends State<AddMedicinePage> {
                 child: CircleAvatar(
                   radius: 40,
                   child: CupertinoButton(
-                    onPressed: () {},
-                    child: const Icon(
-                      CupertinoIcons.photo_camera_solid,
-                      // Icons.camera_alt,
-                      size: 40,
-                      color: Colors.white,
-                    ),
+                    padding: _pickedImage == null
+                        ? null // 이미지가 없을때는 기본값 패딩을 넣음
+                        : EdgeInsets.zero, // CupertinoButton은 기본값으로 패딩이 있음
+                    onPressed: () {
+                      ImagePicker()
+                          .pickImage(source: ImageSource.gallery)
+                          .then((xfile) {
+                        // xfile이 null이면 다음 코드를 수행 안하겠다.
+                        if (xfile == null) return;
+                        // 그러면 ↓이 부분은 무조건 null값이 아님
+                        setState(() {
+                          _pickedImage = File(xfile.path);
+                        });
+                      });
+                    },
+                    child: _pickedImage == null
+                        ? const Icon(
+                            CupertinoIcons.photo_camera_solid,
+                            // Icons.camera_alt,
+                            size: 40,
+                            color: Colors.white,
+                          )
+                        : CircleAvatar(
+                            foregroundImage: FileImage(_pickedImage!),
+                            radius: 40,
+                          ),
                   ),
                 ),
               ),
