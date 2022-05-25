@@ -14,7 +14,6 @@ class AddMedicinePage extends StatefulWidget {
 
 class _AddMedicinePageState extends State<AddMedicinePage> {
   final _nameController = TextEditingController();
-  File? _pickedImage;
 
   @override
   void dispose() {
@@ -42,76 +41,8 @@ class _AddMedicinePageState extends State<AddMedicinePage> {
                   style: Theme.of(context).textTheme.headline4,
                 ),
                 const SizedBox(height: largeSpace),
-                Center(
-                  child: CircleAvatar(
-                    radius: 40,
-                    child: CupertinoButton(
-                      onPressed: () {
-                        showModalBottomSheet(
-                            context: context,
-                            builder: (context) {
-                              return SafeArea(
-                                child: Padding(
-                                  padding: pagePadding,
-                                  child: Column(
-                                    mainAxisSize:
-                                        MainAxisSize.min, // 최소 사이즈로 맞춰줌
-                                    children: [
-                                      TextButton(
-                                        onPressed: () {
-                                          ImagePicker()
-                                              .pickImage(
-                                                  source: ImageSource.camera)
-                                              .then((xfile) {
-                                            // 만약 xfile값이 null이 아닐때만, (사진이 있을때만) 다음 코드를 수행.
-                                            if (xfile != null) {
-                                              setState(() {
-                                                _pickedImage = File(xfile.path);
-                                              });
-                                            }
-                                            // 촬영 후 아니면 촬영 중에 나갈 시 showModal끄기
-                                            Navigator.maybePop(context);
-                                          });
-                                        },
-                                        child: const Text('카메라로 촬영'),
-                                      ),
-                                      TextButton(
-                                        onPressed: () {
-                                          ImagePicker()
-                                              .pickImage(
-                                                  source: ImageSource.gallery)
-                                              .then((xfile) {
-                                            if (xfile == null) return;
-                                            setState(() {
-                                              _pickedImage = File(xfile.path);
-                                              Navigator.maybePop(
-                                                  context); // 사진 선택 후 showModal끄기
-                                            });
-                                          });
-                                        },
-                                        child: const Text('앨범에서 가져오기'),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            });
-                      },
-                      // 이미지가 없을때는 기본값 패딩을 넣음, // CupertinoButton은 기본값으로 패딩이 있음
-                      padding: _pickedImage == null ? null : EdgeInsets.zero,
-                      child: _pickedImage == null
-                          ? const Icon(
-                              CupertinoIcons.photo_camera_solid,
-                              // Icons.camera_alt,
-                              size: 40,
-                              color: Colors.white,
-                            )
-                          : CircleAvatar(
-                              foregroundImage: FileImage(_pickedImage!),
-                              radius: 40,
-                            ),
-                    ),
-                  ),
+                const Center(
+                  child: MedicineImageButton(), // 메서드로 분리
                 ),
                 const SizedBox(height: largeSpace + regulerSpace),
                 Text(
@@ -151,6 +82,99 @@ class _AddMedicinePageState extends State<AddMedicinePage> {
               child: Text('다음'),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// MedicineImageButton 코드가 지저분해 메서드로 분리해둠
+class MedicineImageButton extends StatefulWidget {
+  const MedicineImageButton({Key? key}) : super(key: key);
+
+  @override
+  State<MedicineImageButton> createState() => _MedicineImageButtonState();
+}
+
+class _MedicineImageButtonState extends State<MedicineImageButton> {
+  File? _pickedImage;
+
+  @override
+  Widget build(BuildContext context) {
+    return CircleAvatar(
+      radius: 40,
+      child: CupertinoButton(
+        onPressed: _showBottomSheet, // 메서드로 분리
+        // 이미지가 없을때는 기본값 패딩을 넣음, // CupertinoButton은 기본값으로 패딩이 있음
+        padding: _pickedImage == null ? null : EdgeInsets.zero,
+        child: _pickedImage == null
+            ? const Icon(
+                CupertinoIcons.photo_camera_solid,
+                // Icons.camera_alt,
+                size: 40,
+                color: Colors.white,
+              )
+            : CircleAvatar(
+                foregroundImage: FileImage(_pickedImage!),
+                radius: 40,
+              ),
+      ),
+    );
+  }
+
+  void _showBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return PickImageBottomSheet(
+          // 처리코드 메서드로 분리
+          onPressedCamera: () => _onPressed(ImageSource.camera),
+          onPressedGallery: () => _onPressed(ImageSource.gallery),
+        );
+      },
+    );
+  }
+
+// _onPressed했을때 어떠한 처리를 할 지, 공통된 부분은 함수로 빼서, ImageSource source로 전달 받게끔 설정
+  void _onPressed(ImageSource source) {
+    ImagePicker().pickImage(source: source).then((xfile) {
+      // 만약 xfile값이 null이 아닐때만, (사진이 있을때만) 다음 코드를 수행.
+      if (xfile != null) {
+        setState(() {
+          _pickedImage = File(xfile.path);
+        });
+      }
+      // 촬영 후 아니면 촬영 중에 나갈 시 showModal끄기
+      Navigator.maybePop(context);
+    });
+  }
+}
+
+class PickImageBottomSheet extends StatelessWidget {
+  const PickImageBottomSheet(
+      {Key? key, required this.onPressedCamera, required this.onPressedGallery})
+      : super(key: key);
+
+  final VoidCallback onPressedCamera;
+  final VoidCallback onPressedGallery;
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: pagePadding,
+        child: Column(
+          mainAxisSize: MainAxisSize.min, // 최소 사이즈로 맞춰줌
+          children: [
+            TextButton(
+              onPressed: onPressedCamera,
+              child: const Text('카메라로 촬영'),
+            ),
+            TextButton(
+              onPressed: onPressedGallery,
+              child: const Text('앨범에서 가져오기'),
+            ),
+          ],
         ),
       ),
     );
