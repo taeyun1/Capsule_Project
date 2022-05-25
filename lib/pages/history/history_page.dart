@@ -6,9 +6,7 @@ class HistoryPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('히스토리'),
-      ),
+      appBar: AppBar(title: const Text('History')),
     );
   }
 }
