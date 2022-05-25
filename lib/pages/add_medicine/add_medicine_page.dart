@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:capsule/components/capsule_constants.dart';
+import 'package:capsule/components/capsule_page_route.dart';
+import 'package:capsule/pages/add_medicine/add_alarm_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -14,6 +16,9 @@ class AddMedicinePage extends StatefulWidget {
 
 class _AddMedicinePageState extends State<AddMedicinePage> {
   final _nameController = TextEditingController();
+
+  // 다른 위젯에 있는 _pickedImage 꺼내오는법 (안쪽에(자식이) 갖고있는 데이터를 밖으로 전달)
+  File? _medicineImage; // (1) 객체 만들고
 
   @override
   void dispose() {
@@ -41,8 +46,16 @@ class _AddMedicinePageState extends State<AddMedicinePage> {
                   style: Theme.of(context).textTheme.headline4,
                 ),
                 const SizedBox(height: largeSpace),
-                const Center(
-                  child: MedicineImageButton(), // 메서드로 분리
+                Center(
+                  // 메서드로 분리
+                  // (2) MedicineImageButton 눌러서 타고 들어가 보면
+                  child: MedicineImageButton(
+                    // (6) changeImageFile는 value에 _pickImage를 전달받아서,
+                    changeImageFile: (File? value) {
+                      _medicineImage = value;
+                      // (7)여기서(AddMedicinePage) 선언한 _medicineImage에 _pickImage를 할당해줌
+                    },
+                  ),
                 ),
                 const SizedBox(height: largeSpace + regulerSpace),
                 Text(
@@ -61,6 +74,9 @@ class _AddMedicinePageState extends State<AddMedicinePage> {
                     hintStyle: Theme.of(context).textTheme.bodyText2,
                     contentPadding: textFieldContentPadding, // input안에 좌,우 패딩
                   ),
+                  onChanged: (_) {
+                    setState(() {});
+                  },
                 ),
               ],
             ),
@@ -75,7 +91,7 @@ class _AddMedicinePageState extends State<AddMedicinePage> {
           child: SizedBox(
             height: submitButtonHeight,
             child: ElevatedButton(
-              onPressed: () {},
+              onPressed: _nameController.text.isEmpty ? null : _onAddAlarmPage,
               style: ElevatedButton.styleFrom(
                 textStyle: Theme.of(context).textTheme.subtitle1,
               ),
@@ -86,17 +102,36 @@ class _AddMedicinePageState extends State<AddMedicinePage> {
       ),
     );
   }
+
+  void _onAddAlarmPage() {
+    Navigator.push(
+      context,
+      // 페이드 효과로 Page전환
+      FadePageRoute(
+        page: AddAlarmPage(
+          medicineImage: _medicineImage,
+          medicineName: _nameController.text,
+        ),
+      ),
+    );
+  }
 }
 
 // MedicineImageButton 코드가 지저분해 메서드로 분리해둠
 class MedicineImageButton extends StatefulWidget {
-  const MedicineImageButton({Key? key}) : super(key: key);
+  const MedicineImageButton({Key? key, required this.changeImageFile})
+      : super(key: key);
+
+  // MedicineImageButton 안에 있는 데이터를 가져오려면, ValueChanged가 필요함.
+  // ValueChanged<내가 받고싶은 데이터 객체> 넣어주고, changeImageFile 변수 선언;
+  final ValueChanged<File?> changeImageFile;
 
   @override
   State<MedicineImageButton> createState() => _MedicineImageButtonState();
 }
 
 class _MedicineImageButtonState extends State<MedicineImageButton> {
+  // (4) MedicineImageButton 안에서만 사용되는 _pickedImage값을 밖으로 어떻게 전달하냐
   File? _pickedImage;
 
   @override
@@ -142,6 +177,9 @@ class _MedicineImageButtonState extends State<MedicineImageButton> {
       if (xfile != null) {
         setState(() {
           _pickedImage = File(xfile.path);
+
+          // (5) 내가 선언한changeImageFile()에 파라미터로 전달해줌
+          widget.changeImageFile(_pickedImage);
         });
       }
       // 촬영 후 아니면 촬영 중에 나갈 시 showModal끄기
