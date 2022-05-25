@@ -1,6 +1,8 @@
 import 'dart:io';
 // import 'package:capsule/pages/add_medicine/add_medicine_page.dart';
+import 'package:capsule/components/capsule_colors.dart';
 import 'package:capsule/components/capsule_constants.dart';
+import 'package:capsule/components/capsule_widgets.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -65,7 +67,59 @@ class AlarmBox extends StatelessWidget {
           child: TextButton(
             style: TextButton.styleFrom(
                 textStyle: Theme.of(context).textTheme.subtitle2),
-            onPressed: () {},
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                builder: (context) {
+                  return BottomSheetBody(
+                    children: [
+                      SizedBox(
+                        height: 200,
+                        // CupertinoDatePicker는 높이를 지정해줘야함
+                        child: CupertinoDatePicker(
+                          onDateTimeChanged: (dateTime) {},
+                          mode: CupertinoDatePickerMode.time, // 시간만 선택하게 설정
+                        ),
+                      ),
+                      const SizedBox(height: regulerSpace),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: SizedBox(
+                              height: submitButtonHeight,
+                              child: ElevatedButton(
+                                onPressed: () {},
+                                style: ElevatedButton.styleFrom(
+                                  textStyle:
+                                      Theme.of(context).textTheme.subtitle1,
+                                  primary: Colors.white,
+                                  onPrimary: CapsuleColors.primaryColor,
+                                ),
+                                child: const Text('취소'),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: smallSpace),
+                          Expanded(
+                            child: SizedBox(
+                              height: submitButtonHeight,
+                              child: ElevatedButton(
+                                onPressed: () {},
+                                style: ElevatedButton.styleFrom(
+                                  textStyle:
+                                      Theme.of(context).textTheme.subtitle1,
+                                ),
+                                child: const Text('선택'),
+                              ),
+                            ),
+                          ),
+                        ],
+                      )
+                    ],
+                  );
+                },
+              );
+            },
             child: Text('복용시간 설정'),
           ),
         ),
