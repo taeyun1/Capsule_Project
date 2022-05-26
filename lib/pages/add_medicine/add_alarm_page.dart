@@ -3,30 +3,22 @@ import 'dart:io';
 import 'package:capsule/components/capsule_colors.dart';
 import 'package:capsule/components/capsule_constants.dart';
 import 'package:capsule/components/capsule_widgets.dart';
+import 'package:capsule/services/add_medicine_service.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import 'components/add_page_widget.dart';
 
-class AddAlarmPage extends StatefulWidget {
-  const AddAlarmPage(
+class AddAlarmPage extends StatelessWidget {
+  AddAlarmPage(
       {Key? key, required this.medicineImage, required this.medicineName})
       : super(key: key);
 
   final File? medicineImage;
   final String medicineName;
 
-  @override
-  State<AddAlarmPage> createState() => _AddAlarmPageState();
-}
-
-class _AddAlarmPageState extends State<AddAlarmPage> {
-  final _alarms = <String>{
-    '08:00',
-    '13:00',
-    '19:00',
-  };
+  final service = AddMedicineService();
 
   @override
   Widget build(BuildContext context) {
@@ -40,13 +32,19 @@ class _AddAlarmPageState extends State<AddAlarmPage> {
           ),
           const SizedBox(height: largeSpace),
           Expanded(
-            child: ListView(
-              children: alarmWidgets,
-              // children: const [
-              //   AlarmBox(),
-              //   AlarmBox(),
-              //   AddAlarmBoxButton(),
-              // ],
+            child: AnimatedBuilder(
+              // ** AnimatedBuilder통해 notifyListeners()가 호출되면, builder를 통해 매번 새로 그려짐
+              animation: service,
+              builder: (context, _) {
+                return ListView(
+                  children: alarmWidgets,
+                  // children: const [
+                  //   AlarmBox(),
+                  //   AlarmBox(),
+                  //   AddAlarmBoxButton(),
+                  // ],
+                );
+              },
             ),
           ),
         ],
@@ -61,26 +59,16 @@ class _AddAlarmPageState extends State<AddAlarmPage> {
   List<Widget> get alarmWidgets {
     final children = <Widget>[];
     children.addAll(
-      _alarms.map((alarmTime) => AlarmBox(
+      service.alarms.map(
+        (alarmTime) => AlarmBox(
           time: alarmTime,
-          onPressedMinus: () {
-            setState(() {
-              _alarms.remove(alarmTime);
-            });
-          })),
+          service: service,
+        ),
+      ),
     ); // map은 새 list반환, alarms에 영향이 안감
 
     /// 복용시간 추가 버튼 누를 시 실행
-    children.add(AddAlarmBoxButton(
-      onPressedAdd: () {
-        final now = DateTime.now(); // 현재 시간 출력
-        final nowTime = DateFormat('HH:mm').format(now); // 18:6 -> 18:06 으로 출력
-        setState(() {
-          // _alarms.add('${now.hour}:${now.minute}');
-          _alarms.add(nowTime);
-        });
-      },
-    ));
+    children.add(AddAlarmBoxButton(service: service));
     return children;
   }
 }
@@ -89,25 +77,25 @@ class AlarmBox extends StatelessWidget {
   const AlarmBox({
     Key? key,
     required this.time,
-    required this.onPressedMinus,
+    required this.service,
   }) : super(key: key);
 
   final String time;
 
-  final VoidCallback? onPressedMinus;
+  // final VoidCallback? onPressedMinus;
+  final AddMedicineService service;
 
   @override
   Widget build(BuildContext context) {
-    // String time값을 갖고있고, 반환되는건 DateTime
-    final initTime = DateFormat('HH:mm').parse(time);
-
     return Row(
       children: [
         Expanded(
           flex: 1,
           child: IconButton(
             // 마이너스 함수 처리하는것을 여기 안에서 처리하지 않고, 밖 AddAlarmPage에서 처리하게끔 설정
-            onPressed: onPressedMinus,
+            onPressed: () {
+              service.removeAlarm(time);
+            },
             icon: const Icon(CupertinoIcons.minus_circle),
           ),
         ),
@@ -121,7 +109,8 @@ class AlarmBox extends StatelessWidget {
                 context: context,
                 builder: (context) {
                   return TimePickerBottomSheet(
-                    initialDateTime: initTime,
+                    initialTime: time,
+                    service: service,
                   );
                 },
               );
@@ -134,23 +123,33 @@ class AlarmBox extends StatelessWidget {
   }
 }
 
+// ↓이거 쓴거는 : StatelessWidget가 상태값을 갖지 않고 변경하지 않는다고 선언했는데, _setDateTime 이 값이 final이 아니라 내부에서 계속 변경될 수 있는 아이라서 처리
+// ignore: must_be_immutable
 class TimePickerBottomSheet extends StatelessWidget {
-  const TimePickerBottomSheet({
+  TimePickerBottomSheet({
     Key? key,
-    required this.initialDateTime,
+    required this.initialTime,
+    required this.service,
   }) : super(key: key);
 
-  final DateTime initialDateTime;
+  final String initialTime;
+  final AddMedicineService service;
+  DateTime? _setDateTime;
 
   @override
   Widget build(BuildContext context) {
+    // String time값을 갖고있고, 반환되는건 DateTime
+    final initialDateTime = DateFormat('HH:mm').parse(initialTime);
+
     return BottomSheetBody(
       children: [
         SizedBox(
           height: 200,
           // CupertinoDatePicker는 높이를 지정해줘야함
           child: CupertinoDatePicker(
-            onDateTimeChanged: (dateTime) {},
+            onDateTimeChanged: (dateTime) {
+              _setDateTime = dateTime;
+            },
             mode: CupertinoDatePickerMode.time, // 시간만 선택하게 설정
             initialDateTime: initialDateTime, // TimePicker를 누르면, 그 시간으로 포커싱
           ),
@@ -162,7 +161,7 @@ class TimePickerBottomSheet extends StatelessWidget {
               child: SizedBox(
                 height: submitButtonHeight,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () => Navigator.pop(context),
                   style: ElevatedButton.styleFrom(
                     textStyle: Theme.of(context).textTheme.subtitle1,
                     primary: Colors.white,
@@ -177,7 +176,14 @@ class TimePickerBottomSheet extends StatelessWidget {
               child: SizedBox(
                 height: submitButtonHeight,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    service.setAlarm(
+                      prevTime: initialTime,
+                      setTime: _setDateTime ?? initialDateTime,
+                      // _setDateTime이 있으면 넣어주고, 없으면 기존값
+                    );
+                    Navigator.pop(context);
+                  },
                   style: ElevatedButton.styleFrom(
                     textStyle: Theme.of(context).textTheme.subtitle1,
                   ),
@@ -195,10 +201,11 @@ class TimePickerBottomSheet extends StatelessWidget {
 class AddAlarmBoxButton extends StatelessWidget {
   const AddAlarmBoxButton({
     Key? key,
-    required this.onPressedAdd,
+    required this.service,
   }) : super(key: key);
 
-  final VoidCallback? onPressedAdd;
+  // final VoidCallback? onPressedAdd;
+  final AddMedicineService service;
 
   @override
   Widget build(BuildContext context) {
@@ -206,7 +213,7 @@ class AddAlarmBoxButton extends StatelessWidget {
       style: TextButton.styleFrom(
           padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 6),
           textStyle: Theme.of(context).textTheme.subtitle1),
-      onPressed: onPressedAdd,
+      onPressed: service.addNowAlarm,
       child: Row(
         children: const [
           Expanded(
