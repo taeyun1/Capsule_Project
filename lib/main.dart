@@ -1,8 +1,22 @@
 import 'package:capsule/components/capsule_themes.dart';
 import 'package:capsule/pages/home_page.dart';
+import 'package:capsule/repositories/cpsule_hive.dart';
+import 'package:capsule/repositories/medicine_repository.dart';
+import 'package:capsule/services/capsule_notification_service.dart';
 import 'package:flutter/material.dart';
 
-void main() {
+final notification = CapsuleNotificationService();
+final hive = CapsuleHive();
+final medicineRepository = MedicineRepository();
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await notification.initializeTimeZone();
+  await notification.initializeNotification();
+
+  await hive.initializeHive(); // 기다리고 다음코드 실행
+
   runApp(const MyApp());
 }
 

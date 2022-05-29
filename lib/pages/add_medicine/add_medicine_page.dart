@@ -166,6 +166,12 @@ class _MedicineImageButtonState extends State<MedicineImageButton> {
       }
       // 촬영 후 아니면 촬영 중에 나갈 시 showModal끄기
       Navigator.maybePop(context);
+
+      // 카메라, 갤러리, 알림 접근 권한 없을 시 실행
+    }).onError((error, stackTrace) {
+      // 설정창으로 이동
+      Navigator.pop(context);
+      showPermissionDenied(context, permission: '카메라 및 갤러리 접근');
     });
   }
 }
