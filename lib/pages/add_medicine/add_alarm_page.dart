@@ -5,6 +5,7 @@ import 'package:capsule/components/capsule_constants.dart';
 import 'package:capsule/components/capsule_widgets.dart';
 import 'package:capsule/main.dart';
 import 'package:capsule/models/medicine.dart';
+import 'package:capsule/pages/bottomsheet/time_setting_bottomsheet.dart';
 import 'package:capsule/services/add_medicine_service.dart';
 import 'package:capsule/services/capsule_file_service.dart';
 import 'package:flutter/cupertino.dart';
@@ -149,12 +150,18 @@ class AlarmBox extends StatelessWidget {
               showModalBottomSheet(
                 context: context,
                 builder: (context) {
-                  return TimePickerBottomSheet(
+                  return TimeSettingBottomSheet(
                     initialTime: time,
-                    service: service,
                   );
                 },
-              );
+              ).then((value) {
+                if (value == null || value is! DateTime) return;
+                service.setAlarm(
+                  prevTime: time,
+                  setTime: value,
+                  // _setDateTime이 있으면 넣어주고, 없으면 기존값
+                );
+              });
             },
             child: Text(time),
           ),
@@ -166,78 +173,6 @@ class AlarmBox extends StatelessWidget {
 
 // ↓이거 쓴거는 : StatelessWidget가 상태값을 갖지 않고 변경하지 않는다고 선언했는데, _setDateTime 이 값이 final이 아니라 내부에서 계속 변경될 수 있는 아이라서 처리
 // ignore: must_be_immutable
-class TimePickerBottomSheet extends StatelessWidget {
-  TimePickerBottomSheet({
-    Key? key,
-    required this.initialTime,
-    required this.service,
-  }) : super(key: key);
-
-  final String initialTime;
-  final AddMedicineService service;
-  DateTime? _setDateTime;
-
-  @override
-  Widget build(BuildContext context) {
-    // String time값을 갖고있고, 반환되는건 DateTime
-    final initialDateTime = DateFormat('HH:mm').parse(initialTime);
-
-    return BottomSheetBody(
-      children: [
-        SizedBox(
-          height: 200,
-          // CupertinoDatePicker는 높이를 지정해줘야함
-          child: CupertinoDatePicker(
-            onDateTimeChanged: (dateTime) {
-              _setDateTime = dateTime;
-            },
-            mode: CupertinoDatePickerMode.time, // 시간만 선택하게 설정
-            initialDateTime: initialDateTime, // TimePicker를 누르면, 그 시간으로 포커싱
-          ),
-        ),
-        const SizedBox(height: regulerSpace),
-        Row(
-          children: [
-            Expanded(
-              child: SizedBox(
-                height: submitButtonHeight,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: ElevatedButton.styleFrom(
-                    textStyle: Theme.of(context).textTheme.subtitle1,
-                    primary: Colors.white,
-                    onPrimary: CapsuleColors.primaryColor,
-                  ),
-                  child: const Text('취소'),
-                ),
-              ),
-            ),
-            const SizedBox(width: smallSpace),
-            Expanded(
-              child: SizedBox(
-                height: submitButtonHeight,
-                child: ElevatedButton(
-                  onPressed: () {
-                    service.setAlarm(
-                      prevTime: initialTime,
-                      setTime: _setDateTime ?? initialDateTime,
-                      // _setDateTime이 있으면 넣어주고, 없으면 기존값
-                    );
-                    Navigator.pop(context);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    textStyle: Theme.of(context).textTheme.subtitle1,
-                  ),
-                  child: const Text('선택'),
-                ),
-              ),
-            ),
-          ],
-        )
-      ],
-    );
-  }
-}
 
 class AddAlarmBoxButton extends StatelessWidget {
   const AddAlarmBoxButton({
