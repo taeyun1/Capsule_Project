@@ -4,6 +4,7 @@ import 'package:capsule/components/capsule_constants.dart';
 import 'package:capsule/components/capsule_page_route.dart';
 import 'package:capsule/main.dart';
 import 'package:capsule/models/medicine_alarm.dart';
+import 'package:capsule/pages/today/today_empty_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -38,6 +39,10 @@ class TodayPage extends StatelessWidget {
     final medicines = box.values.toList();
     final medicineAlarms = <MedicineAlarm>[]; // View를 위해 만들어진 모델
 
+    if (medicines.isEmpty) {
+      return const TodayEmty();
+    }
+
     for (var medicine in medicines) {
       for (var alarm in medicine.alarms) {
         medicineAlarms.add(
@@ -52,18 +57,26 @@ class TodayPage extends StatelessWidget {
       }
     }
 
-    return ListView.separated(
-      padding: const EdgeInsets.symmetric(vertical: regulerSpace),
-      itemCount: medicineAlarms.length,
-      itemBuilder: (context, index) {
-        return MedicineListTile(
-          medicineAlarm: medicineAlarms[index],
-        );
-      },
-      separatorBuilder: (context, index) {
-        return const Divider(height: regulerSpace, thickness: 1.0);
-        // return const SizedBox(height: regulerSpace);
-      },
+    return Column(
+      children: [
+        const Divider(height: 1, thickness: 1.0),
+        Expanded(
+          child: ListView.separated(
+            padding: const EdgeInsets.symmetric(vertical: regulerSpace),
+            itemCount: medicineAlarms.length,
+            itemBuilder: (context, index) {
+              return MedicineListTile(
+                medicineAlarm: medicineAlarms[index],
+              );
+            },
+            separatorBuilder: (context, index) {
+              return const Divider(height: regulerSpace, thickness: 1.0);
+              // return const SizedBox(height: regulerSpace);
+            },
+          ),
+        ),
+        const Divider(height: 1, thickness: 1.0),
+      ],
     );
   }
 }
