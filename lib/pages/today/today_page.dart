@@ -85,7 +85,17 @@ class MedicineListTile extends StatelessWidget {
           // CupertinoButton은 자체적으로 패딩을 가지고 있음.
           CupertinoButton(
             padding: EdgeInsets.zero,
-            onPressed: () {},
+            // 이미지 누를시 크게보이게, 이미지 없으면 클릭 X
+            onPressed: medicineAlarm.imagePath == null
+                ? null
+                : () {
+                    Navigator.push(
+                      context,
+                      FadePageRoute(
+                        page: ImageDetailPage(medicineAlarm: medicineAlarm),
+                      ),
+                    );
+                  },
             child: CircleAvatar(
               radius: 40,
               // IOS 14이상부터는 디버그 모드가 유지되고있지않고, 어플리케이션 디렉토리가 영구적이지 않아, 계속 바뀌어 나타나는 이슈(배포하면 imagePath이슈 이상없음)
@@ -128,6 +138,29 @@ class MedicineListTile extends StatelessWidget {
             child: const Icon(CupertinoIcons.ellipsis_vertical),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class ImageDetailPage extends StatelessWidget {
+  const ImageDetailPage({
+    Key? key,
+    required this.medicineAlarm,
+  }) : super(key: key);
+
+  final MedicineAlarm medicineAlarm;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: const CloseButton(),
+      ),
+      body: Center(
+        child: Image.file(
+          File(medicineAlarm.imagePath!),
+        ),
       ),
     );
   }
