@@ -1,6 +1,7 @@
 import 'package:capsule/components/capsule_themes.dart';
 import 'package:capsule/pages/home_page.dart';
 import 'package:capsule/repositories/cpsule_hive.dart';
+import 'package:capsule/repositories/medicine_history_repository.dart';
 import 'package:capsule/repositories/medicine_repository.dart';
 import 'package:capsule/services/capsule_notification_service.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,7 @@ import 'package:flutter/material.dart';
 final notification = CapsuleNotificationService();
 final hive = CapsuleHive();
 final medicineRepository = MedicineRepository();
+final historyRepository = MedicineHistoryRepository();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

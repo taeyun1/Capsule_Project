@@ -4,6 +4,7 @@ import 'package:capsule/components/capsule_constants.dart';
 import 'package:capsule/components/capsule_page_route.dart';
 import 'package:capsule/main.dart';
 import 'package:capsule/models/medicine_alarm.dart';
+import 'package:capsule/models/medicine_history.dart';
 import 'package:capsule/pages/bottomsheet/time_setting_bottomsheet.dart';
 import 'package:capsule/pages/today/today_empty_widget.dart';
 import 'package:flutter/cupertino.dart';
@@ -142,8 +143,18 @@ class MedicineListTile extends StatelessWidget {
                           builder: (context) => TimeSettingBottomSheet(
                             initialTime: medicineAlarm.alarmTime,
                           ),
-                        ).then((value) {
-                          print(value);
+                        ).then((takeDateTime) {
+                          // takeDateTime이 null이거나, DateTime타입이 아닐경우 다음 코드 수행 X
+                          if (takeDateTime == null ||
+                              takeDateTime is! DateTime) {
+                            return;
+                          }
+
+                          historyRepository.addHistory(MedicineHistory(
+                            medicineId: medicineAlarm.id,
+                            alarmTime: medicineAlarm.alarmTime,
+                            takeTime: takeDateTime,
+                          ));
                         });
                       },
                       title: '아까 ',
