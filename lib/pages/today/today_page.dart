@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import '../../models/medicine.dart';
+import 'today_take_title.dart';
 
 class TodayPage extends StatelessWidget {
   const TodayPage({Key? key}) : super(key: key);
@@ -67,9 +68,7 @@ class TodayPage extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: regulerSpace),
             itemCount: medicineAlarms.length,
             itemBuilder: (context, index) {
-              return MedicineListTile(
-                medicineAlarm: medicineAlarms[index],
-              );
+              return _buildListTile(medicineAlarms[index]);
             },
             separatorBuilder: (context, index) {
               return const Divider(height: regulerSpace, thickness: 1.0);
@@ -81,150 +80,51 @@ class TodayPage extends StatelessWidget {
       ],
     );
   }
-}
 
-class MedicineListTile extends StatelessWidget {
-  const MedicineListTile({
-    Key? key,
-    required this.medicineAlarm,
-  }) : super(key: key);
+  Widget _buildListTile(MedicineAlarm medicineAlarm) {
+    return ValueListenableBuilder(
+        valueListenable: historyRepository.historyBox.listenable(),
+        builder: (context, Box<MedicineHistory> historyBox, _) {
+          if (historyBox.values.isEmpty) {
+            return BeforeTakeTile(
+              medicineAlarm: medicineAlarm,
+            );
+          }
 
-  final MedicineAlarm medicineAlarm;
-
-  @override
-  Widget build(BuildContext context) {
-    final textStyle = Theme.of(context).textTheme.bodyText2;
-    return Container(
-      child: Row(
-        children: [
-          // CupertinoButton은 자체적으로 패딩을 가지고 있음.
-          CupertinoButton(
-            padding: EdgeInsets.zero,
-            // 이미지 누를시 크게보이게, 이미지 없으면 클릭 X
-            onPressed: medicineAlarm.imagePath == null
-                ? null
-                : () {
-                    Navigator.push(
-                      context,
-                      FadePageRoute(
-                        page: ImageDetailPage(medicineAlarm: medicineAlarm),
-                      ),
-                    );
-                  },
-            child: CircleAvatar(
-              radius: 40,
-              // IOS 14이상부터는 디버그 모드가 유지되고있지않고, 어플리케이션 디렉토리가 영구적이지 않아, 계속 바뀌어 나타나는 이슈(배포하면 imagePath이슈 이상없음)
-              foregroundImage: medicineAlarm.imagePath == null
-                  ? null
-                  : FileImage(File(medicineAlarm.imagePath!)),
+          final todayTakeHistory = historyBox.values.singleWhere(
+            (history) =>
+                // 내가 먹은 이력중에 이 약의 해당하는 id가 있거나
+                history.medicineId == medicineAlarm.id &&
+                // 내가 먹은 이력중에 alarmTime, 이 약 id에 해당하고 이 이시간에 있으면?
+                history.alarmTime == medicineAlarm.alarmTime &&
+                isToday(history.takeTime, DateTime.now()),
+            orElse: () => MedicineHistory(
+              // 둘다 없으면 orElse 반환
+              medicineId: -1,
+              alarmTime: '',
+              takeTime: DateTime.now(),
             ),
-          ),
-          const SizedBox(width: smallSpace),
-          const Divider(height: 1, thickness: 1.0), // Divider : 구분선
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('🕑 ${medicineAlarm.alarmTime}', style: textStyle),
-                const SizedBox(height: 6),
-                Wrap(
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    Text('${medicineAlarm.name}, ', style: textStyle),
-                    TileActionButton(
-                      onTap: () {},
-                      title: '지금',
-                    ),
-                    Text('l', style: textStyle),
-                    TileActionButton(
-                      onTap: () {
-                        showModalBottomSheet(
-                          context: context,
-                          builder: (context) => TimeSettingBottomSheet(
-                            initialTime: medicineAlarm.alarmTime,
-                          ),
-                        ).then((takeDateTime) {
-                          // takeDateTime이 null이거나, DateTime타입이 아닐경우 다음 코드 수행 X
-                          if (takeDateTime == null ||
-                              takeDateTime is! DateTime) {
-                            return;
-                          }
+          );
 
-                          historyRepository.addHistory(MedicineHistory(
-                            medicineId: medicineAlarm.id,
-                            alarmTime: medicineAlarm.alarmTime,
-                            takeTime: takeDateTime,
-                          ));
-                        });
-                      },
-                      title: '아까 ',
-                    ),
-                    Text('먹었어요', style: textStyle),
-                  ],
-                )
-              ],
-            ),
-          ),
-          CupertinoButton(
-            onPressed: () {
-              medicineRepository.deleteMedicine(medicineAlarm.key);
-            },
-            child: const Icon(CupertinoIcons.ellipsis_vertical),
-          ),
-        ],
-      ),
-    );
+          // 복용안했으면?  BeforeTakeTile 화면 출력
+          if (todayTakeHistory.medicineId == -1 &&
+              todayTakeHistory.alarmTime == '') {
+            return BeforeTakeTile(
+              medicineAlarm: medicineAlarm,
+            );
+          }
+
+          // 복용 했으면?  AfterTakeTile 화면 출력
+          return AfterTakeTile(
+            medicineAlarm: medicineAlarm,
+          );
+        });
   }
 }
 
-class ImageDetailPage extends StatelessWidget {
-  const ImageDetailPage({
-    Key? key,
-    required this.medicineAlarm,
-  }) : super(key: key);
-
-  final MedicineAlarm medicineAlarm;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        leading: const CloseButton(),
-      ),
-      body: Center(
-        child: Image.file(
-          File(medicineAlarm.imagePath!),
-        ),
-      ),
-    );
-  }
-}
-
-class TileActionButton extends StatelessWidget {
-  const TileActionButton({
-    Key? key,
-    required this.onTap,
-    required this.title,
-  }) : super(key: key);
-
-  final VoidCallback onTap;
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    final buttonTextStyle = Theme.of(context)
-        .textTheme
-        .bodyText2
-        ?.copyWith(fontWeight: FontWeight.w500);
-    return GestureDetector(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.all(1.0),
-        child: Text(
-          title,
-          style: buttonTextStyle,
-        ),
-      ),
-    );
-  }
+//  년, 월,일이 같은지 체크
+bool isToday(DateTime source, DateTime destination) {
+  return source.year == destination.year &&
+      source.month == destination.month &&
+      source.day == destination.day;
 }

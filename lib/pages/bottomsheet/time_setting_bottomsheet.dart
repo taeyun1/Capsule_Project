@@ -16,7 +16,10 @@ class TimeSettingBottomSheet extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // String time값을 갖고있고, 반환되는건 DateTime
-    final initialDateTime = DateFormat('HH:mm').parse(initialTime);
+    final initialTimeData = DateFormat('HH:mm').parse(initialTime);
+    final now = DateTime.now();
+    final initialDateTime = DateTime(now.year, now.month, now.day,
+        initialTimeData.hour, initialTimeData.minute);
     DateTime setDateTime = initialDateTime;
 
     return BottomSheetBody(
