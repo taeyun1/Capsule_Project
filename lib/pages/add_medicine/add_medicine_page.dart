@@ -38,7 +38,7 @@ class _AddMedicinePageState extends State<AddMedicinePage> {
         child: AddPageBody(
           children: [
             Text(
-              '어떤 약이에요?',
+              '뭐 먹을 껀가요?',
               style: Theme.of(context).textTheme.headline4,
             ),
             const SizedBox(height: largeSpace),
@@ -55,7 +55,7 @@ class _AddMedicinePageState extends State<AddMedicinePage> {
             ),
             const SizedBox(height: largeSpace + regulerSpace),
             Text(
-              '약 이름',
+              '음식 이름',
               style: Theme.of(context).textTheme.subtitle1,
             ),
             TextFormField(
@@ -65,7 +65,7 @@ class _AddMedicinePageState extends State<AddMedicinePage> {
               textInputAction: TextInputAction.done, // 작성 후 완료버튼 형태로 생성
               style: Theme.of(context).textTheme.bodyText1, // 텍스트 입력 시 스타일 설정
               decoration: InputDecoration(
-                hintText: '복용할 약 이름을 기입해주세요.',
+                hintText: '먹을 음식을 적어주세요.',
                 hintStyle: Theme.of(context).textTheme.bodyText2,
                 contentPadding: textFieldContentPadding, // input안에 좌,우 패딩
               ),

@@ -32,7 +32,7 @@ class AddAlarmPage extends StatelessWidget {
       body: AddPageBody(
         children: [
           Text(
-            '매일 복약 잊지 말아요!',
+            '먹는거 잊지 말아요^^',
             style: Theme.of(context).textTheme.headline4,
           ),
           const SizedBox(height: largeSpace),
@@ -63,8 +63,9 @@ class AddAlarmPage extends StatelessWidget {
             result = await notification.addNotifcication(
               medicineId: medicineRepository.newId,
               alarmTimeStr: alarm,
-              title: '$alarm 약 먹을 시간이에요!',
-              body: '$medicineName 복약했다고 알려주세요!',
+              // title: '$alarm 약 먹을 시간이에요!',
+              title: '$medicineName 먹을 시간이에요!',
+              body: '먹었다고 알려주세요!',
             );
           }
 
@@ -200,7 +201,7 @@ class AddAlarmBoxButton extends StatelessWidget {
           ),
           Expanded(
             flex: 5,
-            child: Center(child: Text('복용시간 추가')),
+            child: Center(child: Text('시간 예약 하기')),
           ),
         ],
       ),

@@ -12,10 +12,10 @@ class TodayEmty extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            const Text('추가된 약이 없습니다.'),
+            const Text('추가된 음식이 없습니다.'),
             const SizedBox(height: smallSpace),
             Text(
-              '약을 추가해주세요.',
+              '음식을 추가해주세요.',
               style: Theme.of(context).textTheme.subtitle1,
             ),
             const SizedBox(height: smallSpace),

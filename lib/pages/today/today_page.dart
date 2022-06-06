@@ -23,7 +23,7 @@ class TodayPage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '오늘 복용할 약은?',
+          '오늘 먹을 예정',
           style: Theme.of(context).textTheme.headline4,
         ),
         const SizedBox(height: regulerSpace),
@@ -117,6 +117,7 @@ class TodayPage extends StatelessWidget {
           // 복용 했으면?  AfterTakeTile 화면 출력
           return AfterTakeTile(
             medicineAlarm: medicineAlarm,
+            history: todayTakeHistory,
           );
         });
   }
