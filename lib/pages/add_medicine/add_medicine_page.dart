@@ -45,7 +45,7 @@ class _AddMedicinePageState extends State<AddMedicinePage> {
             Center(
               // 메서드로 분리
               // (2) MedicineImageButton 눌러서 타고 들어가 보면
-              child: MedicineImageButton(
+              child: _MedicineImageButton(
                 // (6) changeImageFile는 value에 _pickImage를 전달받아서,
                 changeImageFile: (File? value) {
                   _medicineImage = value;
@@ -100,8 +100,8 @@ class _AddMedicinePageState extends State<AddMedicinePage> {
 }
 
 // MedicineImageButton 코드가 지저분해 메서드로 분리해둠
-class MedicineImageButton extends StatefulWidget {
-  const MedicineImageButton({Key? key, required this.changeImageFile})
+class _MedicineImageButton extends StatefulWidget {
+  const _MedicineImageButton({Key? key, required this.changeImageFile})
       : super(key: key);
 
   // MedicineImageButton 안에 있는 데이터를 가져오려면, ValueChanged가 필요함.
@@ -109,10 +109,10 @@ class MedicineImageButton extends StatefulWidget {
   final ValueChanged<File?> changeImageFile;
 
   @override
-  State<MedicineImageButton> createState() => _MedicineImageButtonState();
+  State<_MedicineImageButton> createState() => _MedicineImageButtonState();
 }
 
-class _MedicineImageButtonState extends State<MedicineImageButton> {
+class _MedicineImageButtonState extends State<_MedicineImageButton> {
   // (4) MedicineImageButton 안에서만 사용되는 _pickedImage값을 밖으로 어떻게 전달하냐
   File? _pickedImage;
 

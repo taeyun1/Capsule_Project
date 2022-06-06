@@ -5,6 +5,7 @@ import 'package:capsule/repositories/medicine_history_repository.dart';
 import 'package:capsule/repositories/medicine_repository.dart';
 import 'package:capsule/services/capsule_notification_service.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 final notification = CapsuleNotificationService();
 final hive = CapsuleHive();
@@ -13,6 +14,8 @@ final historyRepository = MedicineHistoryRepository();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await initializeDateFormatting();
 
   await notification.initializeTimeZone();
   await notification.initializeNotification();

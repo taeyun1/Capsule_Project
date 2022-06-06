@@ -90,11 +90,14 @@ class TodayPage extends StatelessWidget {
               medicineAlarm: medicineAlarm,
             );
           }
+          // historyRepository.deleteHistory(19);
 
           final todayTakeHistory = historyBox.values.singleWhere(
             (history) =>
                 // 내가 먹은 이력중에 이 약의 해당하는 id가 있거나
                 history.medicineId == medicineAlarm.id &&
+                // history.medicineKey값이 medicineAlarm.key값 과 동일 하다면
+                history.medicineKey == medicineAlarm.key &&
                 // 내가 먹은 이력중에 alarmTime, 이 약 id에 해당하고 이 이시간에 있으면?
                 history.alarmTime == medicineAlarm.alarmTime &&
                 isToday(history.takeTime, DateTime.now()),
@@ -103,6 +106,7 @@ class TodayPage extends StatelessWidget {
               medicineId: -1,
               alarmTime: '',
               takeTime: DateTime.now(),
+              medicineKey: -1,
             ),
           );
 
