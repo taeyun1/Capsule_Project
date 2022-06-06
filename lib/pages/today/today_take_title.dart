@@ -172,6 +172,17 @@ class AfterTakeTile extends StatelessWidget {
       context: context,
       builder: (context) => TimeSettingBottomSheet(
         initialTime: takeTimeStr,
+        submitTitle: '수정',
+        bottomWidget: TextButton(
+          onPressed: () {
+            historyRepository.deleteHistory(history.key);
+            Navigator.pop(context);
+          },
+          child: Text(
+            '먹은 시간을 지우고 싶어요.',
+            style: Theme.of(context).textTheme.bodyText2,
+          ),
+        ),
       ),
     ).then((takeDateTime) {
       // takeDateTime이 null이거나, DateTime타입이 아닐경우 다음 코드 수행 X

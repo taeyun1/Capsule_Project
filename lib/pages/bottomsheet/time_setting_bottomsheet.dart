@@ -9,9 +9,13 @@ class TimeSettingBottomSheet extends StatelessWidget {
   const TimeSettingBottomSheet({
     Key? key,
     required this.initialTime,
+    this.submitTitle = '선택', // 값이 없으면 디폴트로 '선택'
+    this.bottomWidget,
   }) : super(key: key);
 
   final String initialTime;
+  final Widget? bottomWidget;
+  final String submitTitle;
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +39,10 @@ class TimeSettingBottomSheet extends StatelessWidget {
             initialDateTime: initialDateTime, // TimePicker를 누르면, 그 시간으로 포커싱
           ),
         ),
-        const SizedBox(height: regulerSpace),
+        const SizedBox(height: smallSpace),
+        // bottomWidget이 null이 아니면
+        if (bottomWidget != null) bottomWidget!,
+        const SizedBox(height: smallSpace),
         Row(
           children: [
             Expanded(
@@ -62,7 +69,7 @@ class TimeSettingBottomSheet extends StatelessWidget {
                   style: ElevatedButton.styleFrom(
                     textStyle: Theme.of(context).textTheme.subtitle1,
                   ),
-                  child: const Text('선택'),
+                  child: Text(submitTitle),
                 ),
               ),
             ),
