@@ -1,10 +1,11 @@
-import 'package:capsule/components/capsule_colors.dart';
-import 'package:capsule/components/capsule_constants.dart';
-import 'package:capsule/pages/add_medicine/add_medicine_page.dart';
-import 'package:capsule/pages/history/history_page.dart';
-import 'package:capsule/pages/today/today_page.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
+import '../components/capsule_colors.dart';
+import '../components/capsule_constants.dart';
+import 'add_medicine/add_medicine_page.dart';
+import 'history/history_page.dart';
+import 'today/today_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);

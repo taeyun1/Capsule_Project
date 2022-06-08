@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -36,6 +37,11 @@ class CapsuleNotificationService {
     );
   }
 
+  // medicineId값이 1이고 + 알람시간이 8시면 -> 1 + 0800 => 10800
+  String alarmId(int medicineId, String alarmTime) {
+    return medicineId.toString() + alarmTime.replaceAll(':', '');
+  }
+
   // addNotifcication를 호출하면 permissionNotification가 있는지 물음
   Future<bool> addNotifcication({
     required int medicineId,
@@ -60,9 +66,8 @@ class CapsuleNotificationService {
         : now.day;
 
     /// id
-    String alarmTimeId = alarmTimeStr.replaceAll(':', '');
-    alarmTimeId = medicineId.toString() +
-        alarmTimeId; // medicineId값이 1이고 + 알람시간이 8시면 -> 1 + 0800 => 10800
+    // medicineId값이 1이고 + 알람시간이 8시면 -> 1 + 0800 => 10800
+    String alarmTimeId = alarmId(medicineId, alarmTimeStr);
 
     /// add schedule notification
     final details = _notificationDetails(
@@ -88,7 +93,10 @@ class CapsuleNotificationService {
       uiLocalNotificationDateInterpretation:
           UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.time,
+      payload: alarmTimeId,
     );
+    // pendingNotificationIds를 반환
+    log('[notification list] ${await pendingNotificationIds}');
 
     return true;
   }
@@ -129,5 +137,22 @@ class CapsuleNotificationService {
     } else {
       return false;
     }
+  }
+
+  // 다중 알림 삭제
+  Future<void> deleteMultipleAlarm(List<String> alarmIds) async {
+    log('[before delete notification list] ${await pendingNotificationIds}'); // 삭제 전 리스트
+    for (final alarmId in alarmIds) {
+      final id = int.parse(alarmId);
+      await notification.cancel(id);
+    }
+    log('[after delete notification list] ${await pendingNotificationIds}'); // 삭제 후 리스트
+  }
+
+  Future<List<int>> get pendingNotificationIds {
+    final list = notification
+        .pendingNotificationRequests()
+        .then((value) => value.map((e) => e.id).toList());
+    return list;
   }
 }

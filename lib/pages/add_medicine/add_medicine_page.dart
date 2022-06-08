@@ -4,6 +4,7 @@ import 'package:capsule/components/capsule_constants.dart';
 import 'package:capsule/components/capsule_page_route.dart';
 import 'package:capsule/components/capsule_widgets.dart';
 import 'package:capsule/pages/add_medicine/add_alarm_page.dart';
+import 'package:capsule/pages/bottomsheet/pick_image_bottomsheet.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -173,31 +174,5 @@ class _MedicineImageButtonState extends State<_MedicineImageButton> {
       Navigator.pop(context);
       showPermissionDenied(context, permission: '카메라 및 갤러리 접근');
     });
-  }
-}
-
-class PickImageBottomSheet extends StatelessWidget {
-  const PickImageBottomSheet(
-      {Key? key, required this.onPressedCamera, required this.onPressedGallery})
-      : super(key: key);
-
-  final VoidCallback onPressedCamera;
-  final VoidCallback onPressedGallery;
-
-  @override
-  Widget build(BuildContext context) {
-    // BottomSheetBody : 메서드로 분리
-    return BottomSheetBody(
-      children: [
-        TextButton(
-          onPressed: onPressedCamera,
-          child: const Text('카메라로 촬영'),
-        ),
-        TextButton(
-          onPressed: onPressedGallery,
-          child: const Text('앨범에서 가져오기'),
-        ),
-      ],
-    );
   }
 }
