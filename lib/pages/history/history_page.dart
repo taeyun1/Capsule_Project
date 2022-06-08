@@ -66,6 +66,7 @@ class _TimeTile extends StatelessWidget {
                 ),
           ),
         ),
+        const SizedBox(width: smallSpace),
         Stack(
           alignment: const Alignment(0.0, -0.3),
           children: const [
@@ -119,8 +120,12 @@ class _TimeTile extends StatelessWidget {
       (element) =>
           element.id == history.medicineId &&
           element.key == history.medicineKey,
-      orElse: () =>
-          Medicine(alarms: [], id: -1, imagePath: null, name: '삭제된 음식 입니다.'),
+      orElse: () => Medicine(
+        alarms: [],
+        id: -1,
+        imagePath: history.imagePath,
+        name: history.name, //'삭제된 기록 입니다.',
+      ),
     );
   }
 }
