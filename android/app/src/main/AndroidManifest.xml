@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.capsule">
+    package="com.dev.eat">
    <application
         android:label="배가둔둔"
         android:name="${applicationName}"

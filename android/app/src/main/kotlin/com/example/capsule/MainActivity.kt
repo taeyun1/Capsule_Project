@@ -1,4 +1,4 @@
-package com.example.capsule
+package com.dev.eat
 
 import io.flutter.embedding.android.FlutterActivity
 
