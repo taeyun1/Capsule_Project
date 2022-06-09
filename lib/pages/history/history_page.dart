@@ -33,9 +33,11 @@ class HistoryPage extends StatelessWidget {
   }
 
   Widget _buildListView(context, Box<MedicineHistory> historyBox, _) {
-    // final histories =
-    //     historyBox.values.toList().reversed.toList(); // reversed => 역순
-    final histories = [];
+    final histories =
+        historyBox.values.toList().reversed.toList(); // reversed => 역순
+    // final histories = [];
+
+    // 히스토리에 기록이 없을 시 빈 페이지 전환
     if (histories.isEmpty) {
       return const HistoryEmty();
     }
