@@ -140,7 +140,7 @@ class CapsuleNotificationService {
   }
 
   // 다중 알림 삭제
-  Future<void> deleteMultipleAlarm(List<String> alarmIds) async {
+  Future<void> deleteMultipleAlarm(Iterable<String> alarmIds) async {
     log('[before delete notification list] ${await pendingNotificationIds}'); // 삭제 전 리스트
     for (final alarmId in alarmIds) {
       final id = int.parse(alarmId);

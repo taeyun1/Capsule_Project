@@ -65,47 +65,110 @@ class AddAlarmPage extends StatelessWidget {
       // 완료버튼 누를 시
       bottomNavigationBar: BottomSubmitButton(
         onPressed: () async {
-          bool result = false;
-          // 1. 알람 추가
-          for (var alarm in service.alarms) {
-            result = await notification.addNotifcication(
-              medicineId: medicineRepository.newId,
-              alarmTimeStr: alarm,
-              // title: '$alarm 약 먹을 시간이에요!',
-              title: '$medicineName 먹을 시간이에요!',
-              body: '먹었다고 알려주세요!',
-            );
-          }
-
-          if (!result) {
-            return showPermissionDenied(context, permission: '알람');
-          }
-
-          // 2. 이미지 저장 (local dir : 갤러리 저장이 아닌, 앱 내의 하나의 파일로써 저장)
-          // null이 아닐때만 dir에 저장
-          String? imageFilePath;
-          if (medicineImage != null) {
-            // null이 아닐땐 이미지가 무조건 있으므로 medicineImage! 느낌표 붙여줌
-            imageFilePath = await saveImageToLocalDirectory(medicineImage!);
-          }
-
-          // 3. medicine model 추가 (hive를 사용해서, 사진, 약이름, 알람 리스트들을 모델 객체화 해서 local DB에 저장)
-          final medicine = Medicine(
-            id: medicineRepository.newId,
-            name: medicineName,
-            imagePath: imageFilePath,
-            alarms: service.alarms.toList(),
-          );
-          medicineRepository.addMedicine(medicine);
-
-          // Navigator.pop(context);
-          // 창을 다 끄고 초기화면 홈으로 이동
-          Navigator.popUntil(context, (route) => route.isFirst);
+          final isUpdate = updateMedicineId != -1;
+          // 업데이트 할 때는 _onUpdateMedicine실행, 아닐 때는 _onAddMedicine 실행
+          isUpdate
+              ? await _onUpdateMedicine(context)
+              : await _onAddMedicine(context);
         },
         text: '완료',
       ),
     );
   }
+
+  Future<void> _onAddMedicine(BuildContext context) async {
+    bool result = false;
+    // 1. 알람 추가
+    for (var alarm in service.alarms) {
+      result = await notification.addNotifcication(
+        medicineId: medicineRepository.newId,
+        alarmTimeStr: alarm,
+        // title: '$alarm 약 먹을 시간이에요!',
+        title: '$medicineName 먹을 시간이에요!',
+        body: '먹었다고 알려주세요!',
+      );
+    }
+
+    if (!result) {
+      return showPermissionDenied(context, permission: '알람');
+    }
+
+    // 2. 이미지 저장 (local dir : 갤러리 저장이 아닌, 앱 내의 하나의 파일로써 저장)
+    // null이 아닐때만 dir에 저장
+    String? imageFilePath;
+    if (medicineImage != null) {
+      // null이 아닐땐 이미지가 무조건 있으므로 medicineImage! 느낌표 붙여줌
+      imageFilePath = await saveImageToLocalDirectory(medicineImage!);
+    }
+
+    // 3. medicine model 추가 (hive를 사용해서, 사진, 약이름, 알람 리스트들을 모델 객체화 해서 local DB에 저장)
+    final medicine = Medicine(
+      id: medicineRepository.newId,
+      name: medicineName,
+      imagePath: imageFilePath,
+      alarms: service.alarms.toList(),
+    );
+    medicineRepository.addMedicine(medicine);
+
+    // Navigator.pop(context);
+    // 창을 다 끄고 초기화면 홈으로 이동
+    Navigator.popUntil(context, (route) => route.isFirst);
+  }
+
+  Future<void> _onUpdateMedicine(BuildContext context) async {
+    bool result = false;
+    // 1-1. 이전 알람 삭제 (기존에 갖고있던 알람 삭제)
+    final alarmIds = _updateMedicine.alarms.map(
+      (alarmTime) => notification.alarmId(updateMedicineId, alarmTime),
+    );
+    await notification.deleteMultipleAlarm(alarmIds);
+
+    // 1-2. 알람 추가
+    for (var alarm in service.alarms) {
+      result = await notification.addNotifcication(
+        medicineId: updateMedicineId,
+        alarmTimeStr: alarm,
+        // title: '$alarm 약 먹을 시간이에요!',
+        title: '$medicineName 먹을 시간이에요!',
+        body: '먹었다고 알려주세요!',
+      );
+    }
+
+    if (!result) {
+      return showPermissionDenied(context, permission: '알람');
+    }
+
+    String? imageFilePath = _updateMedicine.imagePath;
+    if (_updateMedicine.imagePath != medicineImage?.path) {
+      // 2-1. 이전 이미지 삭제
+      if (_updateMedicine.imagePath != null) {
+        deleteImage(_updateMedicine.imagePath!);
+      }
+      // 2-2. 이미지 저장
+      if (medicineImage != null) {
+        imageFilePath = await saveImageToLocalDirectory(medicineImage!);
+      }
+    }
+
+    // 3. 업데이트 medicine model 추가 (local DB, hive)
+    final medicine = Medicine(
+      id: updateMedicineId,
+      name: medicineName,
+      imagePath: imageFilePath,
+      alarms: service.alarms.toList(),
+    );
+    medicineRepository.updateMedicine(
+        key: _updateMedicine.key, medicine: medicine);
+
+    // Navigator.pop(context);
+    // 창을 다 끄고 초기화면 홈으로 이동
+    Navigator.popUntil(context, (route) => route.isFirst);
+  }
+
+  Medicine get _updateMedicine =>
+      medicineRepository.medicineBox.values.singleWhere(
+        (medicine) => medicine.id == updateMedicineId,
+      );
 
   List<Widget> get alarmWidgets {
     final children = <Widget>[];
