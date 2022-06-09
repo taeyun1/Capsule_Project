@@ -10,6 +10,7 @@ import 'package:capsule/pages/today/today_empty_widget.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:intl/intl.dart';
 
 import '../../models/medicine.dart';
 import 'today_take_title.dart';
@@ -59,6 +60,13 @@ class TodayPage extends StatelessWidget {
         );
       }
     }
+
+    // 빠른 시간부터 정렬
+    medicineAlarms.sort(
+      (a, b) => DateFormat('HH:mm')
+          .parse(a.alarmTime)
+          .compareTo(DateFormat('HH:mm').parse(b.alarmTime)),
+    );
 
     return Column(
       children: [

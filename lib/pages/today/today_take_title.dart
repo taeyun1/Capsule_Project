@@ -318,6 +318,10 @@ class MedicineImageButton extends StatelessWidget {
         radius: 40,
         // IOS 14이상부터는 디버그 모드가 유지되고있지않고, 어플리케이션 디렉토리가 영구적이지 않아, 계속 바뀌어 나타나는 이슈(배포하면 imagePath이슈 이상없음)
         foregroundImage: imagePath == null ? null : FileImage(File(imagePath!)),
+        // 이미지를 선택 안하면, 알림 아이콘으로 대체
+        child: imagePath == null
+            ? const Icon(CupertinoIcons.alarm_fill, size: 30)
+            : null,
       ),
     );
   }

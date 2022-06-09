@@ -1,5 +1,6 @@
 import 'package:capsule/components/capsule_constants.dart';
 import 'package:capsule/models/medicine.dart';
+import 'package:capsule/pages/today/history_empty_widget.dart';
 import 'package:capsule/pages/today/today_take_title.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -32,8 +33,12 @@ class HistoryPage extends StatelessWidget {
   }
 
   Widget _buildListView(context, Box<MedicineHistory> historyBox, _) {
-    final histories =
-        historyBox.values.toList().reversed.toList(); // reversed => 역순
+    // final histories =
+    //     historyBox.values.toList().reversed.toList(); // reversed => 역순
+    final histories = [];
+    if (histories.isEmpty) {
+      return const HistoryEmty();
+    }
     return ListView.builder(
         itemCount: histories.length,
         itemBuilder: (context, index) {
