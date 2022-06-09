@@ -1,8 +1,25 @@
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 
+import '../main.dart';
+
 class AddMedicineService with ChangeNotifier {
-  final _alarms = <String>{};
+  AddMedicineService(int updateMedicineId) {
+    // 업데이트 일 경우에는 즉, 음식 수정버튼을 눌러서 업데이트 할 때
+    // _alarms 값이 아닌, 내가 예약 했었던 알림값으로 출력
+    final isUpdate = updateMedicineId != -1;
+    if (isUpdate) {
+      final updateAlarms = medicineRepository.medicineBox.values
+          .singleWhere((medicine) => medicine.id == updateMedicineId)
+          .alarms;
+
+      _alarms.clear(); // 안에 있는 값들 초기화
+      _alarms.addAll(updateAlarms);
+    }
+  }
+  final _alarms = <String>{
+    '12:00',
+  };
 
   Set<String> get alarms => _alarms;
 

@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:capsule/components/capsule_constants.dart';
 import 'package:capsule/components/capsule_page_route.dart';
 import 'package:capsule/components/capsule_widgets.dart';
+import 'package:capsule/main.dart';
+import 'package:capsule/models/medicine.dart';
 import 'package:capsule/pages/add_medicine/add_alarm_page.dart';
 import 'package:capsule/pages/bottomsheet/pick_image_bottomsheet.dart';
 import 'package:flutter/cupertino.dart';
@@ -11,17 +13,45 @@ import 'package:image_picker/image_picker.dart';
 import 'components/add_page_widget.dart';
 
 class AddMedicinePage extends StatefulWidget {
-  const AddMedicinePage({Key? key}) : super(key: key);
+  const AddMedicinePage({
+    Key? key,
+    this.updateMedicineId = -1,
+  }) : super(key: key);
+
+  final int updateMedicineId;
 
   @override
   State<AddMedicinePage> createState() => _AddMedicinePageState();
 }
 
 class _AddMedicinePageState extends State<AddMedicinePage> {
-  final _nameController = TextEditingController();
+  late TextEditingController _nameController;
 
   // 다른 위젯에 있는 _pickedImage 꺼내오는법 (안쪽에(자식이) 갖고있는 데이터를 밖으로 전달)
   File? _medicineImage; // (1) 객체 만들고
+
+  bool get _isUpdate => widget.updateMedicineId != -1;
+  Medicine get _updateMedicine =>
+      medicineRepository.medicineBox.values.singleWhere(
+        (medicine) => medicine.id == widget.updateMedicineId,
+      );
+
+  @override
+  void initState() {
+    super.initState();
+
+    //_isUpdate가 활성화 되었을 때, (음식수정 버튼 누를시)
+    // 음식이름 및 이미지를 가져옴
+    if (_isUpdate) {
+      _nameController = TextEditingController(text: _updateMedicine.name);
+      if (_updateMedicine.imagePath != null) {
+        _medicineImage = File(_updateMedicine.imagePath!);
+      }
+    } else {
+      // 아닐때는 기존에 가지고 있던거 그대로
+      _nameController = TextEditingController();
+    }
+  }
 
   @override
   void dispose() {
@@ -47,6 +77,7 @@ class _AddMedicinePageState extends State<AddMedicinePage> {
               // 메서드로 분리
               // (2) MedicineImageButton 눌러서 타고 들어가 보면
               child: _MedicineImageButton(
+                updateImage: _medicineImage,
                 // (6) changeImageFile는 value에 _pickImage를 전달받아서,
                 changeImageFile: (File? value) {
                   _medicineImage = value;
@@ -94,6 +125,7 @@ class _AddMedicinePageState extends State<AddMedicinePage> {
         page: AddAlarmPage(
           medicineImage: _medicineImage,
           medicineName: _nameController.text,
+          updateMedicineId: widget.updateMedicineId,
         ),
       ),
     );
@@ -102,13 +134,14 @@ class _AddMedicinePageState extends State<AddMedicinePage> {
 
 // MedicineImageButton 코드가 지저분해 메서드로 분리해둠
 class _MedicineImageButton extends StatefulWidget {
-  const _MedicineImageButton({Key? key, required this.changeImageFile})
+  const _MedicineImageButton(
+      {Key? key, required this.changeImageFile, this.updateImage})
       : super(key: key);
 
   // MedicineImageButton 안에 있는 데이터를 가져오려면, ValueChanged가 필요함.
   // ValueChanged<내가 받고싶은 데이터 객체> 넣어주고, changeImageFile 변수 선언;
   final ValueChanged<File?> changeImageFile;
-
+  final File? updateImage;
   @override
   State<_MedicineImageButton> createState() => _MedicineImageButtonState();
 }
@@ -116,6 +149,12 @@ class _MedicineImageButton extends StatefulWidget {
 class _MedicineImageButtonState extends State<_MedicineImageButton> {
   // (4) MedicineImageButton 안에서만 사용되는 _pickedImage값을 밖으로 어떻게 전달하냐
   File? _pickedImage;
+
+  @override
+  void initState() {
+    super.initState();
+    _pickedImage = widget.updateImage;
+  }
 
   @override
   Widget build(BuildContext context) {

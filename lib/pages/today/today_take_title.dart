@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:capsule/components/capsule_page_route.dart';
 import 'package:capsule/models/medicine_alarm.dart';
 import 'package:capsule/models/medicine_history.dart';
+import 'package:capsule/pages/add_medicine/add_medicine_page.dart';
 import 'package:capsule/pages/bottomsheet/more_action_bottomsheet.dart';
 import 'package:capsule/pages/bottomsheet/time_setting_bottomsheet.dart';
 import 'package:capsule/pages/today/today_page.dart';
@@ -233,7 +234,17 @@ class _MoreButton extends StatelessWidget {
         showModalBottomSheet(
           context: context,
           builder: (context) => MoreActionBottomSheet(
-            onPressedModify: () {},
+            /// 음식 정보 수정
+            onPressedModify: () {
+              Navigator.push(
+                context,
+                FadePageRoute(
+                  page: AddMedicinePage(updateMedicineId: medicineAlarm.id),
+                ),
+              ).then((_) => Navigator.maybePop(context));
+            },
+
+            /// 음식 정보만 삭제
             onPressedDeleteOnlyMedicine: () {
               // 1. 알림 삭제
               notification.deleteMultipleAlarm(alarmIds);
@@ -242,6 +253,8 @@ class _MoreButton extends StatelessWidget {
               // 3. pop
               Navigator.pop(context);
             },
+
+            /// 음식 기록 및 정보 모두 삭제
             onPressedDeleteAll: () {
               // 1. 알림 삭제
               notification.deleteMultipleAlarm(alarmIds);
